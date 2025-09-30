@@ -1,9 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Sprinklr Widget Loader</title>
-</head>
-<body>
-    <script src="widget.js"></script> 
-</body>
-</html>
+// app_v2.js (Simplified Entry Point)
+
+console.log("✅ Sprinklr widget loaded (Final Test)");
+
+(async function initWidget() {
+  if (!window.Sprinklr) {
+    console.error("❌ Sprinklr SDK not injected");
+    // Wait for the SDK to appear or exit
+    return;
+  }
+  
+  const sdk = await window.Sprinklr.init();
+  console.log("✅ SDK initialized", sdk);
+  
+  // PLACE YOUR IFRAME CREATION AND RESIZE LOGIC HERE
+  // ...
+
+})();
