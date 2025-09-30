@@ -1,9 +1,10 @@
-// index.js (The Parent)
+// index.js (Hosted on GitHub Pages)
 console.log("✅ Sprinklr widget loaded");
 
-// IMPORTANT: Replace this with the *real* URL of your external application.
-const IFRAME_SRC = "https://my-external-app-with-postmessage.com/content.html";
-const CHILD_ORIGIN = "https://my-external-app-with-postmessage.com"; 
+// The external URL of the content to load inside the iframe.
+// We'll use content.html hosted on the same GitHub Pages domain for this test.
+const IFRAME_SRC = "https://strikkie-api.github.io/iframeresizetest/content.html";
+const CHILD_ORIGIN = "https://strikkie-api.github.io"; // Origin is the full GitHub username.github.io part
 
 export async function init() {
   if (!window.Sprinklr) {
@@ -15,26 +16,24 @@ export async function init() {
   console.log("✅ SDK initialized", sdk);
 
   // --- 1. Render the Iframe ---
-  // Sprinklr widgets typically place content in the <body>
   const container = document.body; 
-
   const iframe = document.createElement('iframe');
+  
   iframe.setAttribute('id', 'resizable-content-frame');
   iframe.setAttribute('src', IFRAME_SRC);
   iframe.style.width = '100%';
-  iframe.style.height = '300px'; // Set initial height
+  iframe.style.height = '300px'; 
   iframe.style.border = 'none';
-  iframe.setAttribute('scrolling', 'no'); // Prevent double scrollbars
+  iframe.setAttribute('scrolling', 'no'); 
   
   container.appendChild(iframe);
-  
-  // Resize the *parent widget* itself to 300px initially
-  sdk.resize({ height: 300 }); 
+  sdk.resize({ height: 300 }); // Initial resize of the parent widget
   
   // --- 2. Set up PostMessage Listener ---
   window.addEventListener('message', (event) => {
-      // ⚠️ SECURITY CHECK: Always verify the origin
-      if (event.origin !== CHILD_ORIGIN) {
+      // ⚠️ SECURITY CHECK: The child's origin must match the expected origin.
+      // We check for the root domain, as the path might be stripped.
+      if (!event.origin.startsWith(CHILD_ORIGIN)) {
           console.warn('PostMessage blocked: Unknown origin', event.origin);
           return;
       }
@@ -48,8 +47,7 @@ export async function init() {
           // A. Resize the IFRAME element inside the widget
           iframe.style.height = `${newHeight}px`;
 
-          // B. Resize the Sprinklr widget container itself
-          // Use the Sprinklr SDK for the containing widget resize
+          // B. Resize the Sprinklr widget container itself via the SDK
           sdk.resize({ height: newHeight }); 
       }
   });
