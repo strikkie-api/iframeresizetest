@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>External Iframe Content</title>
+    <style>
+        body { margin: 0; padding: 0; }
+        .content { min-height: 100vh; } /* Ensures content has a minimum size */
+    </style>
+</head>
+<body>
+    <div id="app-content" class="content">
+        <h1>Hello from External App!</h1>
+        <div style="height: 150px; background: #eee;">Short content section</div>
+        <div style="height: 700px; background: #ddd;">Tall content section for testing</div>
+    </div>
+
+    <script>
+        function sendHeightToParent() {
+            // Get the total scroll height of the content
+            const height = document.body.scrollHeight;
+            
+            // IMPORTANT: Replace with the exact origin of your *Sprinklr widget* host
+            const PARENT_ORIGIN = 'https://elderberry-1758871228681.staticrun.app';
+            
+            // Send the raw height as a string (Parent will parse it)
+            window.parent.postMessage(height.toString(), PARENT_ORIGIN);
+            console.log('Sent height to parent:', height);
+        }
+
+        // Send the height when the page loads
+        window.onload = sendHeightToParent;
+
+        // Send height whenever the window resizes (e.g., screen rotation)
+        window.addEventListener('resize', sendHeightToParent);
+        
+        // 💡 If your content changes dynamically (e.g., expanding/collapsing sections), 
+        // you MUST call sendHeightToParent() manually after the change.
+    </script>
+</body>
+</html>
