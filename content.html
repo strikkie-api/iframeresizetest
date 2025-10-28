@@ -1,43 +1,24 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   <title>Dummy SightCall Session</title>
   <style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #007aff 0%, #00a0ff 100%);
-      color: white;
-      text-align: center;
+      margin:0; font-family: Arial, sans-serif;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-height:100vh; background: linear-gradient(135deg, #007aff 0%, #00a0ff 100%);
+      color:white; text-align:center;
     }
     .box {
-      background: rgba(255, 255, 255, 0.15);
-      padding: 20px 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      width: 80%;
-      max-width: 400px;
+      background: rgba(255,255,255,0.15); padding:20px 30px; border-radius:10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15); width:80%; max-width:400px;
     }
-    h1 { font-size: 22px; margin-bottom: 10px; }
-    button {
-      margin: 8px;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    button.start { background-color: #4CAF50; color: white; }
-    button.end { background-color: #e53935; color: white; }
-    button:hover { opacity: 0.9; }
-    small { display: block; margin-top: 10px; font-size: 12px; color: rgba(255,255,255,0.8); }
+    button { margin:8px; padding:10px 18px; border:none; border-radius:6px; font-size:14px; cursor:pointer; transition:0.2s; }
+    button.start { background-color:#4CAF50; color:white; }
+    button.end { background-color:#e53935; color:white; }
+    button:hover { opacity:0.9; }
+    small { display:block; margin-top:10px; font-size:12px; color:rgba(255,255,255,0.8); }
   </style>
 </head>
 <body>
@@ -53,12 +34,11 @@
 
   <script>
     const status = document.getElementById("status");
-    const parentOrigin = "https://strikkie-api.github.io"; // must match your parent origin
+    const parentOrigin = "*"; // allow Sprinklr parent for demo purposes
 
-    function sendMessage(type, payload = {}) {
-      if (window.parent) {
+    function sendMessage(type, payload={}) {
+      if(window.parent) {
         window.parent.postMessage({ type, ...payload }, parentOrigin);
-        console.log("📤 Sent message to parent:", type, payload);
       }
     }
 
@@ -72,29 +52,28 @@
       sendMessage("sessionEnded");
     });
 
-    // Send height on load
+    // Messages from parent
+    window.addEventListener("message", event => {
+      const data = event.data;
+      if(data.type === "init") {
+        status.textContent = "Initialized with key: " + data.localKey;
+      }
+      if(data.type === "requestLocalKey") {
+        sendMessage("localKey", { value: "elderberry-demo-key" });
+      }
+    });
+
+    // Send initial height
     function sendHeight() {
       const height = document.body.scrollHeight;
       sendMessage("iframeReady", { height });
     }
 
-    window.addEventListener("message", (event) => {
-      if (event.origin !== parentOrigin) return;
-
-      const data = event.data;
-      console.log("📥 Received from parent:", data);
-
-      if (data.type === "requestLocalKey") {
-        sendMessage("localKey", { value: "elderberry-demo-key" });
-      }
-    });
-
-    // Send height when content loads
     window.onload = sendHeight;
 
-    // Optional: update height if content changes dynamically
+    // Auto-update height if content changes
     const observer = new MutationObserver(sendHeight);
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList:true, subtree:true });
   </script>
 </body>
 </html>
