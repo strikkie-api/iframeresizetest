@@ -1,19 +1,23 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>Sprinklr CCaaS Resize Test</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h2>Sprinklr CCaaS Widget Test</h2>
-  <p id="status">Loading Sprinklr SDK...</p>
+<script>
+  const iframe = document.getElementById('child-frame');
 
-  <div id="iframe-container" style="width:100%; border:1px solid #ccc; border-radius:6px; overflow:hidden;">
-    <iframe id="child-frame" src="https://strikkie-api.github.io/iframeresizetest/content.html"
-            width="100%" height="300" style="border:none;"></iframe>
-  </div>
+  window.addEventListener('message', (event) => {
+    if (event.origin !== 'https://strikkie-api.github.io') return;
 
-  <script src="script.js"></script>
-</body>
-</html>
+    const data = event.data;
+    console.log('Parent received:', data);
+
+    if (data.type === 'iframeReady') {
+      // Example: adjust height dynamically
+      iframe.style.height = '500px'; // or calculate dynamically
+    }
+
+    if (data.type === 'sessionStarted') {
+      console.log('Session started in iframe');
+    }
+
+    if (data.type === 'sessionEnded') {
+      console.log('Session ended in iframe');
+    }
+  });
+</script>
