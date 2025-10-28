@@ -1,40 +1,112 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <title>External Iframe Content</title>
-    <style>
-        body { margin: 0; padding: 10px; }
-        .tall-content { height: 750px; background: #ddd; padding: 20px; }
-    </style>
+  <meta charset="utf-8" />
+  <title>Dummy SightCall Session</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #007aff 0%, #00a0ff 100%);
+      color: white;
+      text-align: center;
+    }
+    .box {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      width: 80%;
+      max-width: 400px;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    button {
+      margin: 8px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button.start {
+      background-color: #4CAF50;
+      color: white;
+    }
+    button.end {
+      background-color: #e53935;
+      color: white;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    small {
+      display: block;
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.8);
+    }
+  </style>
 </head>
 <body>
-    <div id="app-content">
-        <h1>Hello from GitHub Pages! (Child App)</h1>
-        <p>This page is sending its height to the Sprinklr widget.</p>
-        <div class="tall-content">
-            This section makes the overall page taller than 300px.
-        </div>
-        <p>End of content.</p>
+  <div class="box">
+    <h1>📞 Dummy SightCall Session</h1>
+    <p>This simulates an embedded video session.</p>
+    <div>
+      <button id="start" class="start">Start Session</button>
+      <button id="end" class="end">End Session</button>
     </div>
+    <small id="status">Idle...</small>
+  </div>
 
-    <script>
-        function sendHeightToParent() {
-            // Get the total scroll height of the content
-            const height = document.body.scrollHeight;
-            
-            // IMPORTANT: The parent origin is your GitHub Pages URL
-            const PARENT_ORIGIN = 'https://strikkie-api.github.io'; 
-            
-            // Send the raw height as a string (Parent will parse it)
-            window.parent.postMessage(height.toString(), PARENT_ORIGIN);
-            console.log('Sent height to parent:', height);
-        }
+  <script>
+    const status = document.getElementById("status");
+    const parentOrigin = "https://strikkie-api.github.io"; // change if testing locally
 
-        // Run when the page loads
-        window.onload = sendHeightToParent;
+    function sendMessage(type, payload = {}) {
+      if (window.parent) {
+        window.parent.postMessage({ type, ...payload }, parentOrigin);
+        console.log("📤 Sent message to parent:", type, payload);
+      }
+    }
 
-        // Run when the window size changes
-        window.addEventListener('resize', sendHeightToParent);
-    </script>
+    document.getElementById("start").addEventListener("click", () => {
+      status.textContent = "Session started.";
+      sendMessage("sessionStarted");
+    });
+
+    document.getElementById("end").addEventListener("click", () => {
+      status.textContent = "Session ended.";
+      sendMessage("sessionEnded");
+    });
+
+    // Respond to messages from parent (requestLocalKey, init)
+    window.addEventListener("message", (event) => {
+      console.log("📥 Received from parent:", event.origin, event.data);
+
+      if (event.data.type === "init") {
+        status.textContent = "Initialized with key: " + event.data.localKey;
+      }
+
+      if (event.data.type === "localKey") {
+        status.textContent = "Local key received: " + event.data.value;
+      }
+
+      if (event.data.type === "requestLocalKey") {
+        sendMessage("localKey", { value: "elderberry-demo-key" });
+      }
+    });
+
+    // Notify parent that iframe is ready
+    window.onload = () => sendMessage("iframeReady");
+  </script>
 </body>
 </html>
