@@ -1,18 +1,59 @@
-// app_v2.js (Simplified Entry Point)
-
-console.log("✅ Sprinklr widget loaded (Final Test)");
+console.log("✅ Sprinklr widget loaded");
 
 (async function initWidget() {
+  // Wait for Sprinklr SDK
   if (!window.Sprinklr) {
     console.error("❌ Sprinklr SDK not injected");
-    // Wait for the SDK to appear or exit
     return;
   }
-  
+
   const sdk = await window.Sprinklr.init();
   console.log("✅ SDK initialized", sdk);
-  
-  // PLACE YOUR IFRAME CREATION AND RESIZE LOGIC HERE
-  // ...
+
+  // Create iframe dynamically
+  const iframeContainer = document.createElement("div");
+  iframeContainer.style.width = "100%";
+  iframeContainer.style.border = "1px solid #ccc";
+  iframeContainer.style.borderRadius = "6px";
+  iframeContainer.style.overflow = "hidden";
+  iframeContainer.style.marginTop = "12px";
+
+  const iframe = document.createElement("iframe");
+  iframe.src = "https://strikkie-api.github.io/iframeresizetest/content.html"; // iframe content
+  iframe.style.width = "100%";
+  iframe.style.border = "none";
+  iframe.height = "300"; // default until resized
+  iframeContainer.appendChild(iframe);
+
+  // Append to Sprinklr container (or body)
+  document.body.appendChild(iframeContainer);
+
+  const parentOrigin = "https://strikkie-api.github.io";
+
+  // Listen for messages from iframe
+  window.addEventListener("message", (event) => {
+    if (event.origin !== parentOrigin) return;
+    const data = event.data;
+    console.log("Parent received:", data);
+
+    if (data.type === "iframeReady" && data.height) {
+      iframe.style.height = data.height + "px";
+      console.log("Iframe height set dynamically:", data.height);
+    }
+
+    if (data.type === "sessionStarted") {
+      console.log("Session started in iframe");
+    }
+
+    if (data.type === "sessionEnded") {
+      console.log("Session ended in iframe");
+    }
+  });
+
+  // Optional: send init message to iframe
+  iframe.onload = () => {
+    iframe.contentWindow.postMessage({ type: "init", localKey: "elderberry-demo-key" }, parentOrigin);
+    console.log("Init message sent to iframe");
+  };
 
 })();
