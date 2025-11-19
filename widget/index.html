@@ -1,11 +1,64 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>SightCall Widget</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="widget.mjs"></script>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SightCall Widget</title>
+  <style>
+    #sightcall-container {
+      width: 100%;
+      height: 350px;
+      border: 1px solid #ccc;
+      overflow: hidden;
+      transition: height 0.3s ease;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script>
+    // Inline widget code
+    const Sightcall = ({ sdk }) => {
+      const containerWrapper = document.createElement('div');
+      containerWrapper.style.padding = '8px';
+      containerWrapper.style.width = '100%';
+
+      const title = document.createElement('h2');
+      title.textContent = 'SightCall Widget';
+      containerWrapper.appendChild(title);
+
+      const container = document.createElement('div');
+      container.id = 'sightcall-container';
+
+      const iframe = document.createElement('iframe');
+      iframe.src = 'https://strikkie-api.github.io/iframeresizetest/content.html';
+
+      container.appendChild(iframe);
+      containerWrapper.appendChild(container);
+
+      // Listen for messages from iframe
+      window.addEventListener('message', (event) => {
+        const data = event.data;
+        if (!data) return;
+
+        if (data.type === 'sessionStarted') {
+          container.style.height = '650px';
+        }
+        if (data.type === 'sessionEnded') {
+          container.style.height = '250px';
+        }
+      });
+
+      return containerWrapper;
+    };
+
+    // Render in Sprinklr
+    Sprinklr.renderWidget(Sightcall);
+  </script>
+</body>
 </html>
